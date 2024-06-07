@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Agendamento de Motorista</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    </head>
+
+    <body class="bg-primary-subtle min-vh-100">
+
+      <div id="app">
+        <nav class="navbar navbar-expand-lg border-bottom border-dark bg-body-tertiary fs-6 text-body" style="--bs-border-opacity: .5;">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="bi bi-gear-wide-connected me-1"></i>Oficina Mecânica</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item"><a class="nav-link" href="/home">Menu de trabalho</a></li>
+                  <li class="nav-item"><a class="nav-link" href="">Colaboradores</a></li>
+                  <li class="nav-item"><a class="nav-link" href="">Suporte técnico</a></li>
+              </ul>
+              <div class="navbar-nav justify-content-left">
+                <a class="nav-link" href="">Área do usuário</a>
+                <button class=" nav-link text-start" data-bs-toggle="modal" data-bs-target="#logoutModal"> Encerrar sessão</button>
+                <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="logoutModalLabel">Encerramento de sessão</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          Você está encerrando o sistema. Deseja finalizar sua sessão?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                          <button type="button" class="btn btn-danger" @click="doLogout()">Finalizar</button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div class="container-fluid p-5 pt-2">
+          <div class="card mb-3">
+            <div class="card-header">
+                <h1 class="text-center my-3">Agendamento de Motorista</h1>
+            </div>
+          </div>
+    
+          <div class="card mb-3">
+            <div class="card-header text-secondary">
+              Orçamentos e Requisições de Reparo
+            </div>
+            <div class="card-body">
+              <h4 class="card-title fw-semibold">Orçamentos/Requisições de Reparo</h4>
+              <p class="card-text">Selecione o orçamento/(requisição de reparo) para o qual deseja requisitar o serviço de motorista.</p>
+
+              <form ref="escolheOrcamentoForm" class="row mb-3 gx-3 gy-2 justify-content-center" @submit.prevent="openCofirmInserePopUp">
+                
+                <div class="form-check">
+
+                  <div v-for="reparo in dadosReparo" :key="reparo._id">
+                    <input class="form-check-input" type="radio" name="exampleRadios" v-model="selectedOption" :value="reparo" checked>
+                    <label class="form-check-label" for="exampleRadios1">
+                      Reparo do dia {{reparo.date}} às: {{reparo.time}}.
+                    </label>
+                  </div>
+
+                  <div v-for="orcamento in dadosOrcamento" :key="orcamento._id">
+                    <input class="form-check-input" type="radio" name="exampleRadios" v-model="selectedOption" :value="orcamento" checked>
+                    <label class="form-check-label" for="exampleRadios1">
+                      Orçamento do dia {{orcamento.date}} às {{orcamento.time}}.
+                    </label>
+                  </div>
+
+                  
+                </div>
+
+                <div class="v-100"></div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-header text-secondary">
+              Agendamento
+            </div>
+            <div class="card-body">
+              <h4 class="card-title fw-semibold">Horário</h4>
+              <p class="card-text">Escolha um horário para o serviço de motorista.</p>
+              <!--Informações da peça a ser inserida-->
+              <form ref="insereOrcamentoForm" class="row mb-3 gx-3 gy-2 justify-content-center" @submit.prevent="openCofirmInserePopUp">
+  
+                <label for="appt">time:</label>
+                <input type="time" class="form-control" v-model="selectedTime" id="appt" name="appt"> 
+                <div class="v-100"></div>
+  
+                <button type="submit" v-on:click="doPost()" class="col-4 mt-4 btn btn btn-large btn-primary">Agendar o Serviço de Motorista</button>
+  
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </body>
+
+    <script>
+
+      async function procGet() {
+        var data = {client: app.client, budgetManager: app.budgetManager , mechanic: app.mechanic, vehicle: app.vehicle, budget: app.budget, repairType: app.repairType, requestedRepair: app.requestedRepair, details: app.details, date: app.date, time: app.time, status: app.status, budgetManagerComment: app.budgetManagerComment, mechanicComment: app.mechanicComment};
+      //  {"ra": "123456", "nome": "Albert Einstein", "curso": "Fisica"}
+        var request = axios({"method": "get","url": "/orcamentos_motorista"});
+        try {
+          response = await request
+        } catch (error) {
+          response = {"data": { "resultado": " URL inválida" }, "status": 404, "statusText": "Error"}
+        } 
+
+        app.dadosOrcamento = response.data.filter(item => item.user === app.id_user)
+
+        app.doGetRepair()
+      }
+
+      function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for(let i = 0; i <ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
+
+      function checkCookie(){
+        let userAuth = JSON.parse(getCookie('userAuth'));
+        app.id_user = userAuth._id;
+      }
+
+      async function procGetReparo() {
+        var data = {client: app.client, mechanic: app.mechanic , budgetService: app.budgetService, usedParts: app.usedParts, status: app.status, date: app.date, time: app.time, completed: app.completed, mechanicComment: app.mechanicComment};
+      //  {"ra": "123456", "nome": "Albert Einstein", "curso": "Fisica"}
+        var request = axios({"method": "get","url": "/reparos_motorista"});
+        try {
+          response = await request
+        } catch (error) {
+          response = {"data": { "resultado": " URL inválida" }, "status": 404, "statusText": "Error"}
+        } 
+
+        app.dadosReparo = response.data.filter(item => item.user === app.id_user)
+      }
+
+      async function procPost () {
+       var url = '/agendamento_motorista';
+
+        app.date = app.selectedOption.date
+        app.time = app.selectedTime
+
+       var data = {date: app.date, time: app.time, selectedOption: app.selectedOption};
+       var request = axios({
+                   "method": "post",
+                   "url": url,
+                   "headers": { "Content-Type": "application/json" },
+                   "data": data});
+        try {
+         response = await request
+       } catch (error) {
+         response = response = {"data": { "resultado": " URL inválida" }, "status": 404, "statusText": "Error"}
+       }  
+
+       app.doGet();
+    }
+
+    async function logout(){
+      var request = axios({
+        "method": "delete",
+        "url": "/login"});
+      try {
+        var response = await request;
+        window.open('/','_parent');
+      } catch (error) {
+        return;
+      }
+    }
+
+      var configdata = {
+        el: '#app',
+        data: { 
+          mensagem:'',
+          dadosOrcamento: {},
+          dadosReparo: {},
+          selectedOption:'',
+          selectedDate: '',
+          selectedTime: '',
+          client:'',
+          mechanic:'',
+          budgetService:'',
+          status:'',
+          date:'',
+          time:'',
+          completed:'',
+          mechanicComment:'',
+          disa: true
+
+        },
+    methods: {
+
+      doLogout: logout,
+      doGet: procGet,
+      doPost: procPost,
+      doGetRepair: procGetReparo
+
+    }
+    
+  }
+  
+      var app
+      window.onload = () => {
+        app = new Vue(configdata);
+        checkCookie();
+        app.doGet();
+      } 
+  
+    </script>
+</html>

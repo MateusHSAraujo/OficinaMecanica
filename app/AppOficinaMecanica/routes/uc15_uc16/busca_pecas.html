@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Busca de peças</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+</head>
+<body class="bg-primary-subtle min-vh-100">
+    <div id="app">
+        <nav class="navbar navbar-expand-lg border-bottom border-dark bg-body-tertiary fs-6 text-body" style="--bs-border-opacity: .5;">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#"><i class="bi bi-gear-wide-connected me-1"></i>Oficina Mecânica</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="/home">Menu de trabalho</a></li>
+                <li class="nav-item"><a class="nav-link" href="">Colaboradores</a></li>
+                <li class="nav-item"><a class="nav-link" href="">Suporte técnico</a></li>
+            </ul>
+            <div class="navbar-nav justify-content-left">
+                <a class="nav-link" href="">Área do usuário</a>
+                <button class=" nav-link text-start" data-bs-toggle="modal" data-bs-target="#logoutModal"> Encerrar sessão</button>
+                <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="logoutModalLabel">Encerramento de sessão</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        Você está encerrando o sistema. Deseja finalizar sua sessão?
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger" @click="doLogout()">Finalizar</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+          </div>
+        </div>
+    </nav>
+
+    <!-- Aqui começa o app -->  
+    <div class="container-fluid p-5 pt-2">
+        <div class="card mb-3">
+          <div class="card-header">
+              <h1 class="text-center my-3">Busca de peças</h1>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header text-secondary">
+            Visualização da planilha de peças
+          </div>
+          <div class="card-body">
+            <visualizacao-estoque ref="listagemEstoque"
+              :fillcreaterequisicaocompraformcb="doFillRequisicaoCompraForm"
+              hideatualiza="true"></visualizacao-estoque>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header text-secondary">  
+            Realizar requisição de compra de peça
+          </div>
+          <div class="card-body">
+            <h4 class="card-title fw-semibold">Informações da Peça</h4>
+            <p class="card-text">Forneça os dados da peça que precisa ser comprada. A requisição será enviada ao gerente de estoque, que irá analisa-la.</p>
+            <!--Informações da peça a ser inserida-->
+            <form ref="requerePecaForm" class="row mb-3 gx-3 gy-2 justify-content-center" @submit.prevent="openCofirmRequerePopUp">
+
+              <!-- Campo de nome da peça -->
+              <div class="col-4" id="nameContainer">
+                  <label for="name" class="form-label">Nome</label>
+                  <input type="text" class="form-control" id="name" v-model="pecaRequere.name" @blur="doValidateField('name',/^.+$/)" @input="doEraseInvalidState('name')" pattern="^.+$" required>
+                  <div class="invalid-feedback"><small>O nome da peça é um campo obrigatório.</small></div>
+              </div>
+              
+              <!-- Campo de Carro compatível da peça -->
+              <div class="col-2" id="carContainer">
+                <label for="car" class="form-label">Carro compatível</label>
+                <input type="text" class="form-control" id="car" v-model="pecaRequere.car" @blur="doValidateField('car',/^.+$/)" @input="doEraseInvalidState('car')" pattern="^.+$" required>
+                <div class="invalid-feedback"><small>O carro compatível é um campo obrigatório.</small></div>
+              </div>
+
+              <div class="v-100"></div>
+
+              <!-- Campo de Tipo da peça -->
+              <div class="col-3" id="typeContainer">
+                <label for="type" class="form-label">Tipo</label>
+                <input type="text" class="form-control" id="type" v-model="pecaRequere.type" @blur="doValidateField('type',/^.+$/)" @input="doEraseInvalidState('type')" pattern="^.+$" required>
+                <div class="invalid-feedback"><small>O tipo da peça é um campo obrigatório.</small></div>
+              </div>
+
+              <!-- Campo de quantidade -->
+              <div class="col-3" id="quantityContainer">
+                <label for="quantity" class="form-label">Quantidade</label>
+                <input type="text" class="form-control" id="quantity" v-model="pecaRequere.quantity" @blur="doValidateField('quantity',/^0*[1-9]+[0-9]*$/)" @input="doEraseInvalidState('quantity')" pattern="^0*[1-9]+[0-9]*$" required>
+                <div class="invalid-feedback"><small>A quantidade deve ser um número inteiro positivo.</small></div>
+              </div>
+
+              <div class="v-100"></div>
+
+              <button type="submit" class="col-4 mt-4 btn btn btn-large btn-primary">Criar requisição de compra</button>
+              <div id="CreateRequisicaoAlertPlaceholder" class="row container-fluid pt-3"></div>
+
+              <div class="modal fade" id="confirmRequereModal" tabindex="-1" aria-labelledby="confirmRequereModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="confirmRequereModalLabel">Confirmação de requisição de compra</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <span>Confira os dados da requisição de compra de peça sendo realizada:</span>
+                        <pre class="mt-3">
+Nome da peça:     {{pecaRequere.name}}
+Carro compatível: {{pecaRequere.car}}
+Tipo da peça:     {{pecaRequere.type}}
+Quantidade:       {{pecaRequere.quantity}}</pre>
+                      </div>
+                      <div class="modal-footer">
+                      <div id="CreateRequisicaoModalAlertPlaceholder" class="row container-fluid"></div>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <button type="button" class="btn btn-success" @click="doQuantityCheckThenRequerePeca">Confirmar</button>
+                      </div>
+                  </div>
+                  </div>
+              </div>
+
+              <div class="modal fade" id="confirmRequereJaDisponivelModal" tabindex="-1" aria-labelledby="confirmRequereJaDisponivelModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="confirmRequereJaDisponivelModalLabel">Confirmação de requisição de compra</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="pb-3">
+                          A quantidade requisitada para a peça especificada <strong>já está disponível</strong> no estoque, deseja realmente realizar a requisição de compra ao gerente?
+                        </div>
+                      <div class="modal-footer">
+                      <div id="CreateRequisicaoJaDisponivelModalAlertPlaceholder" class="row container-fluid"></div>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <button type="button" class="btn btn-success" @click="doRequereJaDisponivel">Confirmar</button>
+                      </div>
+                  </div>
+                  </div>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="module">
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie(){
+  let userAuth = JSON.parse(getCookie('userAuth'));
+  app.name = userAuth.name;
+}
+
+async function logout(){
+    var request = axios({
+                "method": "delete",
+                "url": "/login"});
+    try {
+        var response = await request;
+        window.open('/','_parent');
+    } catch (error) {
+        return;
+    }
+}
+
+function validateField(fieldId,pattern){
+    let fieldEl = document.getElementById(fieldId);
+    if(pattern.test(fieldEl.value)){
+        fieldEl.classList.remove('is-invalid');
+        fieldEl.classList.add('is-valid');
+        return true;
+    }else{
+        fieldEl.classList.remove('is-valid');
+        fieldEl.classList.add('is-invalid');
+        return false;
+    }
+}
+
+function eraseInvalidState(id){
+  let containerEl = document.getElementById(id);
+  containerEl.classList.remove('is-invalid');
+}
+
+function appendAlert(message, type, id){
+  let alertPlaceholder = document.getElementById(id)
+  let wrapper = document.createElement('div');
+  let icon = '';
+  if(type == 'danger') icon = 'exclamation-triangle';
+  else if(type == 'success') icon = 'check';
+  wrapper.innerHTML = [
+      `<div class="row alert alert-${type} alert-dismissible fade show" role="alert">`,
+      `   <div class="col-auto small">`,
+      `     <i class="col-1 bi bi-${icon}"></i>`,
+      `     <span>${message}</span>`,
+      '   </div>',
+      '   <button type="button" class="col-1 btn-close" data-bs-dismiss="alert" aria-label="Close" id="alertCloseBtn"></button>',
+      '</div>'
+  ].join('');
+
+  alertPlaceholder.appendChild(wrapper);
+  setTimeout(()=> {
+      document.getElementById('alertCloseBtn').click();
+  },3000);
+}
+
+function clearRequereForm() {
+  let form = this.$refs.requerePecaForm;
+  if(!form) return;
+
+  this.pecaRequere = {
+    name:'',
+    car:'',
+    type:'',
+    quantity:'',
+  }
+
+  form.reset();
+
+  // Get all form elements inside the form
+  const formElements = form.elements;
+
+  for (let i = 0; i < formElements.length; i++) {
+    const fieldEl = formElements[i];
+    if (fieldEl.classList.contains('is-valid')) {
+      fieldEl.classList.remove('is-valid');
+    }
+    if (fieldEl.classList.contains('is-invalid')) {
+      fieldEl.classList.remove('is-invalid');
+    }
+  }
+}
+
+function fillRequisicaoCompraForm(name, car, type, quantity) {
+  this.pecaRequere.name = name;
+  this.pecaRequere.car = car;
+  this.pecaRequere.type = type;
+  this.pecaRequere.quantity = quantity;
+}
+
+var modalConfirmaRequere;
+function openCofirmRequerePopUp() {
+  modalConfirmaRequere = new bootstrap.Modal(document.getElementById('confirmRequereModal'));
+  modalConfirmaRequere.show();
+}
+
+var modalConfirmaRequereJaDisponivel;
+function openCofirmRequereJaDisponivelPopUp() {
+  modalConfirmaRequereJaDisponivel = new bootstrap.Modal(document.getElementById('confirmRequereJaDisponivelModal'));
+  modalConfirmaRequereJaDisponivel.show();
+}
+
+async function quantityCheckThenRequerePeca() {
+  let pecaRequere = this.pecaRequere;
+  let pecas = this.$refs.listagemEstoque.pecas;
+  let disponivel = false;
+
+  // verifica se a quantidade requisitada ja está disponível
+  for(let peca of pecas) {
+    if( peca.nome == pecaRequere.nome &&
+        peca.car == pecaRequere.car &&
+        peca.type == pecaRequere.type &&
+        peca.quantity >= pecaRequere.quantity){
+          disponivel = true;
+          break;
+        }
+  }
+
+  if(disponivel) {
+    openCofirmRequereJaDisponivelPopUp();
+    modalConfirmaRequere.hide();
+  }
+  else {
+    var data = JSON.stringify({nameMechanic: this.name, namePeca:pecaRequere.name, ...pecaRequere});
+    var response;
+    var request = axios({
+      "method": "post",
+      "url": '/requisicao_compra_peca',
+      "headers": { "Content-Type": "application/json" },
+      "data": data
+    });
+    try {
+      response = await request;
+      modalConfirmaRequere.hide();
+      this.doClearRequereForm();
+      appendAlert('Requisição de compra de peça criada com sucesso.','success','CreateRequisicaoAlertPlaceholder');
+    } catch (error) {
+      appendAlert(error.response.data,'danger','CreateRequisicaoModalAlertPlaceholder');
+      return;
+    }
+  }
+}
+
+async function requereJaDisponivel() {
+  let pecaRequere = this.pecaRequere;
+  var data = JSON.stringify({nameMechanic: this.name, namePeca:pecaRequere.name, ...pecaRequere});
+  var response;
+  var request = axios({
+    "method": "post",
+    "url": '/requisicao_compra_peca',
+    "headers": { "Content-Type": "application/json" },
+    "data": data
+  });
+  try {
+    response = await request;
+    modalConfirmaRequereJaDisponivel.hide();
+    this.doClearRequereForm();
+    appendAlert('Requisição de compra de peça criada com sucesso.','success','CreateRequisicaoAlertPlaceholder');
+  } catch (error) {
+    appendAlert(error.response.data,'danger','CreateRequisicaoJaDisponivelModalAlertPlaceholder');
+    return;
+  }
+}
+
+// Faz requisição GET pelo componente
+import visualizacaoEstoqueComponent from '/visualizacao_estoque_component.js'
+
+var configdata = {
+  el: '#app',
+  data: {
+    name: '',
+    pecaRequere: {
+      name:'',
+      car:'',
+      type:'',
+      quantity:'',
+    },
+  },
+  methods: {
+    doLogout: logout,
+    doValidateField: validateField,
+    doEraseInvalidState: eraseInvalidState,
+    openCofirmRequerePopUp: openCofirmRequerePopUp,
+    doQuantityCheckThenRequerePeca: quantityCheckThenRequerePeca,
+    doClearRequereForm: clearRequereForm,
+    doRequereJaDisponivel: requereJaDisponivel,
+    doFillRequisicaoCompraForm: fillRequisicaoCompraForm
+  },
+  components: {
+    'visualizacao-estoque': visualizacaoEstoqueComponent
+  }
+}
+
+var app;
+window.onload = () => {
+  app = new Vue(configdata);
+  checkCookie();
+}
+</script>
+</html>

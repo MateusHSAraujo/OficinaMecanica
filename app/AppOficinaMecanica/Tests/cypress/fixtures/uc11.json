@@ -1,0 +1,76 @@
+{
+    "clients":[{
+      "user": {
+        "username":"dummy1",
+        "password":"dummy1",
+        "role":  "cliente",
+        "accountDataModel": "client"
+      } ,
+      "clientData": {
+        "name": "José", 
+        "surname": "Carlos", 
+        "cpf": "11122233344", 
+        "cep": "77889955", 
+        "email": "dummy@gmail.com",
+        "address": "street abc", 
+        "birthday": "2000-05-05", 
+        "phone": "89858486251", 
+        "user": ""
+      },
+      "vehicles": [{
+        "licensePlate": "BRA0S19", 
+        "year": "2020", 
+        "model": "Pegout 208", 
+        "owner": ""
+      }, {
+        "licensePlate": "AAA0B22", 
+        "year": "2000", 
+        "model": "Savero", 
+        "owner": ""
+      },{
+        "licensePlate": "CCC0D44",
+        "year": "2010",
+        "model": "Celta", 
+        "owner": ""
+      }]
+    }],
+    "employees":[{
+        "user": {
+          "username": "mecanico", 
+          "password": "mecanico",
+          "role":  "mecanico", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Cláudio", 
+          "jobsRelated": 0
+        }
+      },
+      {
+        "user": {
+          "username": "gerente1", 
+          "password": "gerente1",
+          "role":  "gerente_orcamento", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Márcio", 
+          "jobsRelated": 0
+        }
+    }],
+    "BS":[{
+        "client": "",
+        "budgetManager": "",
+        "vehicle": "",
+        "repairType": "Troca de peça",
+        "requestedRepair": false,
+        "details": "Trocar calota do pneu dianteiro esquerdo",
+        "date": "2024-01-19",
+        "time": "09:00",
+        "status": "Serviço encerrado"
+    }],
+    "budgets":[{
+        "status": "Aprovado", 
+        "total_cost": 30 
+    }]
+  }

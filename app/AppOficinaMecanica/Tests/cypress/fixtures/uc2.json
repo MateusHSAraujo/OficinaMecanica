@@ -1,0 +1,64 @@
+{
+    "ct1":{
+        "user": {
+            "username":"mateus_123",
+            "password":"senha_3210@.",
+            "role":  "cliente",
+            "accountDataModel": "client"
+            } ,
+        "clientData": {
+            "name": "Mateus Henrique", 
+            "surname": "Silva Araújo", 
+            "cpf": "07070777721", 
+            "cep": "77889955", 
+            "email": "mateusaraujo@gmail.com",
+            "address": "Avenida Senador Filinto Müller, número 1588, apto 1802", 
+            "birthday": "2001-05-20", 
+            "phone": "65981090807"
+        },
+        "vehicles": [{
+            "licensePlate": "BRA0S19", 
+            "year": "2020", 
+            "model": "Pegout 208"
+        }, {
+            "licensePlate": "AAA0B22", 
+            "year": "2000", 
+            "model": "Savero"
+        },{
+            "licensePlate": "CCC0D44",
+            "year": "2010",
+            "model": "Celta"
+        }]
+    },
+    "ct2":{
+        "user": {
+            "username":"outrousuario123",
+            "password":"outrasenha123",
+            "role":  "cliente",
+            "accountDataModel": "client"
+            } ,
+        "clientData": {
+            "name": "Outro Nome", 
+            "surname": "Outro Sobrenome", 
+            "cpf": "11111111150", 
+            "cep": "11223344", 
+            "email": "outroemail@gmail.com",
+            "address": "Rua dos Bobos, número 0", 
+            "birthday": "1997-05-20", 
+            "phone": "66988097007"
+        },
+        "vehicles": [{
+            "licensePlate": "BBB0S19", 
+            "year": "2020", 
+            "model": "Pegout 207"
+        }, {
+            "licensePlate": "HHH0B22", 
+            "year": "2000", 
+            "model": "Toyota Cross"
+        },{
+            "licensePlate": "FFF0D44",
+            "year": "2010",
+            "model": "SW4"
+        }]
+    }
+}

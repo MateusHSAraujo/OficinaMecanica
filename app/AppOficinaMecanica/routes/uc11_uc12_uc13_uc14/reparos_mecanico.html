@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Serviços de reparo</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    </head>
+
+<body  class="bg-primary-subtle min-vh-100">
+    <div id="app">
+        <!--Navbar-->
+        <nav class="navbar navbar-expand-lg border-bottom border-dark bg-body-tertiary fs-6 text-body" style="--bs-border-opacity: .5;">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/"><i class="bi bi-gear-wide-connected me-1"></i>Oficina Mecânica</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" aria-current="page" href="/home">Menu de trabalho</a></li>
+                    <li class="nav-item"><a class="nav-link" href="">Colaboradores</a></li>
+                    <li class="nav-item"><a class="nav-link" href="">Suporte técnico</a></li>
+                </ul>
+                <div class="navbar-nav justify-content-left">
+                    <a class="nav-link" href="">Área do usuário</a>
+                    <button class=" nav-link text-start" data-bs-toggle="modal" data-bs-target="#logoutModal"> Encerrar sessão</button>
+                    <div class="modal" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="logoutModalLabel">Encerramento de sessão</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            Você está encerrando o sistema. Deseja finalizar sua sessão?
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-danger" @click="doLogout()">Finalizar</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+    
+              </div>
+            </div>
+        </nav>
+        <!--Fim da navbar-->
+
+        <!--Inicio do corpo-->
+        <div class="container-fluid p-5 pt-2">
+            
+            <!--Inicio do primeiro card (título da página)-->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h1 class="text-center my-3" >Serviços de reparo</h1>
+                </div>
+            </div>
+            <!--Fim do primeiro card (título da página)-->
+
+            <!--Inicio do sedundo card (serviços)-->
+            <div class="card mb-3">
+                <div class="card-header text-secondary">
+                  Execução de serviços
+                </div>
+                
+                <div class="card-body">
+                    <h4 class="card-title fw-semibold">Novos serviços de reparo recebidos</h4>
+                    <p class="card-text text-break">Abaixo estão todos os novos serviços de reparo aos quais você foi encarregado.
+                        Para dar prosseguimento a um serviço, pressione "Executar".
+                    </p>
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <table class="table table-sm align-middle text-center table-light table-striped table-hover" v-if="RSlist.length>0">
+                                    <tr>
+                                        <th>ID de serviço</th>
+                                        <th>Cliente</th>
+                                        <th>Veículo</th>
+                                        <th>Tipo de reparo</th>
+                                        <th>Orçamento Total</th>
+                                        <th>Preço de peças</th>
+                                        <th>Preço de mão-de-obra</th>
+                                        <th>Agendamento</th>
+                                        <th>Operação</th>
+                                    </tr>
+                                    <tr v-for="itrS in RSlist" :key="itrS.id">
+                                        <td>{{itrS.serviceId}}</td>
+                                        <td>{{itrS.clientInfo.name}}</td>
+                                        <td>{{itrS.vehicle.model + " - " +itrS.vehicle.year+" - "+itrS.vehicle.licensePlate}}</td>
+                                        <td>{{itrS.repairType}}</td>
+                                        <td>{{'$'+itrS.budget.total_cost}}</td>
+                                        <td>{{'$'+itrS.budget.parts_cost}}</td>
+                                        <td>{{'$'+itrS.budget.service_cost}}</td>
+                                        <td>{{itrS.date.slice(8,10)+'/'+itrS.date.slice(5,7)+'/'+itrS.date.slice(2,4)+' - '+itrS.time}}</td>
+                                        <td><button class="btn  btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#executeServiceModal"
+                                             @mousedown="doInitiateModalInfo(itrS)">Executar</button></td>
+                                    </tr>
+                                </table> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Fim do sedundo card (serviços)-->
+
+            <!-- MODAL -->
+            <div class="modal " id="executeServiceModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true" v-if="currSelectedRS!=''">
+                <div class="modal-dialog scrollable modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Serviço <small class="lead">#{{currSelectedRS.serviceId}}</small></h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      
+                        <div class="row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                              <div class="card">
+                                <div class="card-body">
+                                  <h5 class="card-title">Informações de cliente</h5>
+                                  <div class="container-fluid">
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Nome:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currSelectedRS.clientInfo.name}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Telefone:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{`(${currSelectedRS.clientInfo.phone.slice(0,2)})${currSelectedRS.clientInfo.phone.slice(2,7)}-${currSelectedRS.clientInfo.phone.slice(7)}`}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">E-mail:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currSelectedRS.clientInfo.email}}</p>
+                                        </div>
+                                    </div>
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-sm-6">
+                              <div class="card">
+                                <div class="card-body">
+                                  <h5 class="card-title">Informações de veículo</h5>
+                                  <div class="container-fluid">
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Modelo:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currSelectedRS.vehicle.model}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Placa:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currSelectedRS.vehicle.licensePlate}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Ano:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currSelectedRS.vehicle.year}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-sm-12">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <h5 class="card-title">Informações de reparo</h5>
+                                    <div class="container-fluid">
+                                      <div class="row justify-content-left">
+                                          <div class="col-4">
+                                              <strong class="card-text">Tipo de reparo:</strong>
+                                          </div>
+                                          <div class="col-auto">
+                                              <p class="card-text"> {{currSelectedRS.repairType}}</p>
+                                          </div>
+                                      </div>
+                                      <div class="row justify-content-left">
+                                          <div class="col-4">
+                                              <strong class="card-text">Horário agendado:</strong>
+                                          </div>
+                                          <div class="col-auto">
+                                              <p class="card-text"> {{currSelectedRS.date.slice(8,10)+'/'+currSelectedRS.date.slice(5,7)+'/'+currSelectedRS.date.slice(2,4)+' - '+currSelectedRS.time}}</p>
+                                          </div>
+                                      </div>
+                                      <div class="row justify-content-left">
+                                          <div class="col-4">
+                                              <strong class="card-text">Descrição do problema:</strong>
+                                          </div>
+                                          <div class="col-auto">
+                                              <p class="card-text"> {{currSelectedRS.details}}</p>
+                                          </div>
+                                      </div>
+                                      <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Seu comentário anterior:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currSelectedRS.previousComment}}</p>
+                                        </div>
+                                    </div>
+                                  </div>
+                                    
+                                  </div>
+                                </div>
+                              </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <h5 class="modal-title">Execução de serviço</h5>
+                            <p class="modal-text text-break">Preencha o formulário abaixo após a efetuação do reparo, indicando as peças utilizadas e 
+                                detalhando o reparo feito. Lembre-se que você pode requisitar novas peças no
+                                <a href="/busca_pecas" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">estoque</a>
+                                .
+                            </p>
+                            <div class="container-fluid">
+                                <div class="row justify-content-center">
+                                    <form id="executeRSForm" @submit.prevent="doFinishRS()">
+                                        <div class="container-fluid">
+                                            <div class="row g-3 justify-content-center">
+                                                <div class="col-auto">
+                                                    <label for="piece" class="col-form-label">Peça utilizada</label>
+                                                </div>
+                                                <div class="col-3">
+                                                    <select class="form-select" v-model="currSelectedPiece" id="piece" type="text" id="mechanic"  class="form-control">
+                                                        <option v-for="itrP in availablePieces" :value="itrP" 
+                                                            v-if="selectedPieces.findIndex((el)=> el.piece._id ==itrP._id )==-1">{{itrP.name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <label for="quantity" class="col-form-label">Quantidade</label>
+                                                </div>
+                                                <div class="col-2 me-3">
+                                                    <input type="number" id="quantity" min="0" :max="(currSelectedPiece!=undefined)? currSelectedPiece.quantity:0" class="form-control" 
+                                                    title="Insira somente números" :disabled="(currSelectedPiece=='' || currSelectedPiece==undefined)? true:false"
+                                                    v-model="currSelectedPieceQty">
+                                                </div>
+                                                <button type="button" class="btn col-auto btn-primary"  
+                                                    :disabled="(currSelectedPiece==undefined || currSelectedPiece=='' || currSelectedPieceQty<=0 ||  
+                                                                 currSelectedPieceQty > currSelectedPiece.quantity )? true:false" 
+                                                    @click="doAddPiece()">Adicionar peça</button>
+                                            </div>
+                                            <div class="row justify-content-center"><p class="col-11 ps-4 form-text">
+                                                Selecione as peças que você usou, em seguida forneça quantidade usada e confirme pressionando "Adicionar peça".
+                                                As peças adicionadas a lista de peças abaixo.</p></div>
+                                            <div class="row g-3 justify-content-center">
+                                                <div class="col-11">
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+                                                            <div class="row justify-content-left">
+                                                                <div class="col-auto">
+                                                                    <p class="form-label">Lista de peças utilizadas:</p>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <table class="table table-sm text-center align-middle table-light table-striped table-hover" v-if="selectedPieces.length>0">
+                                                                        <tr>
+                                                                            <th>Peça</th>
+                                                                            <th>Quantidade</th>
+                                                                            <th>Valor total</th>
+                                                                            <th>Operação</th>
+                                                                        </tr>
+                                                                        <tr v-for="itrP in selectedPieces" :key="itrP.id">
+                                                                            <td>{{itrP.piece.name}}</td>
+                                                                            <td>{{itrP.usedQuantity}}</td>
+                                                                            <td>{{'$'+itrP.piece.price*itrP.usedQuantity}}</td>
+                                                                            <td><button type="button" class="btn btn-small btn-outline-danger" v-on:click="doRemovePiece(itrP)">Remover</button></td>
+                                                                        </tr>
+                                                                    </table>   
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                    
+                                                    <div class="row justify-content-left">
+                                                        <div class="container-fluid">
+                                                            <div class="row justify-content-center">
+                                                                <label for="comments" class="form-label">Detalhes de serviço</label>
+                                                                <div class="col-12">
+                                                                    <textarea class="form-control" id="comments" rows="3" v-model="repairComments" required></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12"><p class="form-text">
+                                                                Detalhe acima o serviço realziado. Lembre-se de que essa descrição poderá ser vista pelo cliente.</p></div>
+                                                        </div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                      <button  type="submit" form="executeRSForm" class="btn btn-success">Enviar</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <!--Fim do corpo-->
+        <div id="alertPlaceHolder" class="position-fixed bottom-0 end-0 p-3"></div>
+    </div>
+</body>
+<script>
+
+function appendAlert(message, type, id,ms){
+    let alertPlaceholder = document.getElementById(id)
+    let wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        `<div class="row alert alert-${type} alert-dismissible show" role="alert">`,
+        `   <div class="col-auto small">`,
+        `     <i class="col-1 ${(type=='success')? 'bi bi-check-circle-fill':'bi bi-exclamation-triangle'}"></i>`,
+        `     <span>${message}</span>`,
+        '   </div>',
+        '   <button type="button" class="col-1 btn-close" data-bs-dismiss="alert" aria-label="Close" id="alertCloseBtn"></button>',
+        '</div>'
+    ].join('');
+
+    alertPlaceholder.appendChild(wrapper);
+    setTimeout(()=> {
+        document.getElementById('alertCloseBtn').click();
+    },ms);
+}
+
+function initiateModalInfo(selectedService){
+    app.currSelectedRS=selectedService; 
+    app.repairComments='';
+    app.selectedPieces=[];
+}
+
+function addPiece(){
+    app.selectedPieces.push({piece: app.currSelectedPiece, usedQuantity: app.currSelectedPieceQty});
+    app.currSelectedPiece = '';
+    app.currSelectedPieceQty = '';
+}
+
+function removePieceFromSelectedList(removingPiece){
+    let index = app.selectedPieces.findIndex((el)=> {
+        let a =el.piece._id;
+        let b = removingPiece.piece._id;
+        return a == b;
+    });
+    app.selectedPieces.splice(index,1);
+
+}
+
+async function updateRSServicesTable(){
+    var request = axios({
+                "method": "get",
+                "url": "/repairs"});
+
+    try {
+        var response = await request;
+        for (itrS of response.data.services){
+            let index = app.RSlist.findIndex( (element) => element.serviceId == itrS.serviceId);
+            if (index!=-1){
+                app.RSlist[index]=itrS;
+            } else {
+                app.RSlist.push(itrS);
+            }
+        }
+        app.availablePieces = response.data.availablePieces;
+    } catch (error) {
+        console.error(error); 
+        return
+    }
+}
+
+async function finishRepairService(){
+    if (/^([a-zA-ZÀ-ÿ'0-9:,./!]+[ ]*[a-zA-ZÀ-ÿ'0-9:,./!]+)+$/.test(app.repairComments)==false){
+        appendAlert('Campo de detalhes preenchido incorretamente. Reescreva-o e tente novamente.','warning','alertPlaceHolder',3000);
+        return
+    }
+
+    const modalEl = document.getElementById('executeServiceModal');
+    const modalBooststrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalBooststrap.hide();
+    
+    let data = {mechanicComment: app.repairComments , usedPieces:app.selectedPieces}
+    
+    var request = axios({
+                "method": "put",
+                "url": '/repairs/manage/'+app.currSelectedRS.serviceId,
+                "headers": { "Content-Type": "application/json" },
+                "data":JSON.stringify(data)});
+    try {
+        var response = await request;
+        let index = app.RSlist.findIndex((element) => element.serviceId == app.currSelectedRS.serviceId);
+        app.RSlist.splice(index,1);
+        appendAlert('Serviço executado com sucesso!','success','alertPlaceHolder',3000);
+        updateRSServicesTable();
+
+    } catch (error){
+        console.error(error);
+        appendAlert(errr.response.data,'danger','alertPlaceHolder',2500);
+        return;
+    }
+}
+
+async function logout(){
+    var request = axios({
+                "method": "delete",
+                "url": "/login"});
+    try {
+        var response = await request;
+        window.open('/','_self');
+    } catch (error) {
+        console.error(error);
+        return;
+    } 
+}
+
+var configdata = {
+    el: '#app',
+    data: {
+        RSlist : [],
+        currSelectedRS : '',
+        selectedPieces: [],
+        repairComments: '',
+        repairServices: [],
+        availablePieces: [],
+        currSelectedPiece: '',
+        currSelectedPieceQty: '',
+    },
+    methods: {
+        doAddPiece : addPiece,
+        doRemovePiece : removePieceFromSelectedList,
+        doInitiateModalInfo : initiateModalInfo,
+        doFinishRS : finishRepairService,
+        doLogout: logout
+    }  
+}
+
+var app;
+    window.onload = () => {
+    app = new Vue(configdata);
+    updateRSServicesTable();
+} 
+
+</script>

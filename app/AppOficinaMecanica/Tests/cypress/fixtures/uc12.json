@@ -1,0 +1,130 @@
+{
+    "client":{
+      "user": {
+        "username":"dummy1",
+        "password":"dummy1",
+        "role":  "cliente",
+        "accountDataModel": "client"
+      } ,
+      "clientData": {
+        "name": "José", 
+        "surname": "Carlos", 
+        "cpf": "11122233344", 
+        "cep": "77889955", 
+        "email": "dummy@gmail.com",
+        "address": "street abc", 
+        "birthday": "2000-05-05", 
+        "phone": "89858486251", 
+        "user": ""
+      },
+      "vehicles": [{
+        "licensePlate": "BRA0S19", 
+        "year": "2020", 
+        "model": "Pegout 208", 
+        "owner": ""
+      }, {
+        "licensePlate": "AAA0B22", 
+        "year": "2000", 
+        "model": "Savero", 
+        "owner": ""
+      },{
+        "licensePlate": "CCC0D44",
+        "year": "2010",
+        "model": "Celta", 
+        "owner": ""
+      },{
+        "licensePlate": "KKK0DF23",
+        "year": "2023",
+        "model": "SW4", 
+        "owner": ""
+      }]
+    },
+    "employees":[{
+        "user": {
+          "username": "mecanico1", 
+          "password": "mecanico1",
+          "role":  "mecanico", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Cláudio", 
+          "jobsRelated": 0
+        }
+      },
+      {
+        "user": {
+          "username": "mecanico2", 
+          "password": "mecanico2",
+          "role":  "mecanico", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "João", 
+          "jobsRelated": 0
+        }
+      },
+      {
+        "user": {
+          "username": "mecanico3", 
+          "password": "mecanico3",
+          "role":  "mecanico", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Carlos", 
+          "jobsRelated": 0
+        }
+      },
+      {
+        "user": {
+          "username": "gerente", 
+          "password": "gerente",
+          "role":  "gerente_orcamento", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Márcio", 
+          "jobsRelated": 0
+        }
+    }],
+    "BS":[{
+        "status": "Solicitação de serviço enviada",
+        "repairType": "Outro",
+        "requestedRepair": false,
+        "details": "Consertar barulho estranho do motor",
+        "date": "2024-02-15",
+        "time": "16:30"
+    },{
+        "repairType": "Pintura",
+        "requestedRepair": false,
+        "details": "Pintar de preto",
+        "date": "2024-10-11",
+        "time": "10:30",
+        "status": "Avaliação finalizada"
+    },{
+        "repairType": "Conserto de lataria",
+        "requestedRepair": false,
+        "details": "Consertar amassado no capo", 
+        "date": "2023-11-04",
+        "time": "15:30",
+        "status": "Avaliação finalizada"
+    },
+    {
+        "repairType": "Troca de peça",
+        "requestedRepair": false,
+        "details": "Trocar calota do pneu dianteiro esquerdo",
+        "date": "2024-01-19",
+        "time": "09:00",
+        "status": "Serviço encerrado"
+    }],
+    "budgets":[{
+        "status": "Aprovação pendente", 
+        "total_cost": 10
+    },{
+        "status": "Rejeição pendente",
+        "total_cost": 20
+    },{
+        "status": "Aprovado", 
+        "total_cost": 30 
+    }]
+  }

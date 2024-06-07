@@ -1,0 +1,97 @@
+{
+    "client":{
+      "user": {
+        "username":"dummy1",
+        "password":"dummy1",
+        "role":  "cliente",
+        "accountDataModel": "client"
+      } ,
+      "clientData": {
+        "name": "José", 
+        "surname": "Carlos", 
+        "cpf": "11122233344", 
+        "cep": "77889955", 
+        "email": "dummy@gmail.com",
+        "address": "street abc", 
+        "birthday": "2000-05-05", 
+        "phone": "89858486251", 
+        "user": ""
+      },
+      "vehicles": [{
+        "licensePlate": "BRA0S19", 
+        "year": "2020", 
+        "model": "Pegout 208", 
+        "owner": ""
+      }, {
+        "licensePlate": "AAA0B22", 
+        "year": "2000", 
+        "model": "Savero", 
+        "owner": ""
+      },{
+        "licensePlate": "CCC0D44",
+        "year": "2010",
+        "model": "Celta", 
+        "owner": ""
+      },{
+        "licensePlate": "KKK0DF23",
+        "year": "2023",
+        "model": "SW4", 
+        "owner": ""
+      }]
+    },
+    "mechanic":{
+        "user": {
+          "username": "mecanico", 
+          "password": "mecanico",
+          "role":  "mecanico", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Cláudio", 
+          "jobsRelated": 0
+        }
+    },
+    "manager":{
+        "user": {
+          "username": "gerente", 
+          "password": "gerente",
+          "role":  "gerente_orcamento", 
+          "accountDataModel": "employee"
+        },
+        "employeeData":{
+          "name": "Márcio", 
+          "jobsRelated": 0
+        }
+    },
+    "RS":{
+        "status": "Em andamento",
+        "date": "2024-02-15",
+        "time": "09:30",
+        "completed": false,
+        "requestedDriver": false
+    },
+    "parts":[{
+        "name": "Parafuso P740",
+        "price": "100",
+        "quantity": 50
+    },
+    {
+        "name": "Porca P530",
+        "price": "200",
+        "quantity": 10
+    }],
+    "BS":{
+        "status": "Serviço encerrado",
+        "repairType": "Outro",
+        "requestedRepair": true,
+        "details": "Consertar barulho estranho do motor",
+        "date": "2024-02-15",
+        "time": "16:30"
+    },
+    "budget":{
+        "status": "Aprovado", 
+        "total_cost": 1500,
+        "parts_cost": 1000,
+        "service_cost": 500
+    }
+  }

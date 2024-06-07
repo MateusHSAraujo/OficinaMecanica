@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Área de Orçamentos</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    </head>
+
+    <body  class="bg-primary-subtle min-vh-100">
+    <div id="app">
+        <nav class="navbar navbar-expand-lg border-bottom border-dark bg-body-tertiary fs-6 text-body" style="--bs-border-opacity: .5;">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/"><i class="bi bi-gear-wide-connected me-1"></i>Oficina Mecânica</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" aria-current="page" href="/home">Menu de trabalho</a></li>
+                    <li class="nav-item"><a class="nav-link" href="">Colaboradores</a></li>
+                    <li class="nav-item"><a class="nav-link" href="">Suporte técnico</a></li>
+                </ul>
+                <div class="navbar-nav justify-content-left">
+                    <a class="nav-link" href="">Área do usuário</a>
+                    <button class=" nav-link text-start" data-bs-toggle="modal" data-bs-target="#logoutModal"> Encerrar sessão</button>
+                    <div class="modal " id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="logoutModalLabel">Encerramento de sessão</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            Você está encerrando o sistema. Deseja finalizar sua sessão?
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-danger" @click="doLogout()">Finalizar</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+    
+              </div>
+            </div>
+        </nav>
+
+        
+        <div class="container-fluid p-5 pt-2">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h1 class="text-center my-3" >Área de Orçamentos</h1>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header text-secondary">
+                  Abertura de serviços de orçamento
+                </div>
+                
+                <div class="card-body">
+                    <h4 class="card-title fw-semibold">Novas requisições de serviço de orçamento</h4>
+                    <p class="card-text text-break">Abaixo estão todas as novas solicitações de serviço de orçamento que você recebeu. 
+                        Selecione a opção "Gerar", preencha abrir o formulário de início de um serviço.</p>
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-9">
+                                <table class="table table-sm align-middle text-center table-light table-striped table-hover" v-if="openBSlist.length>0">
+                                    <tr>
+                                        <th>ID de serviço</th>
+                                        <th>Cliente</th>
+                                        <th>Veículo</th>
+                                        <th>Tipo de reparo</th>
+                                        <th>Agendamento</th>
+                                        <th>Operação</th>
+                                    </tr>
+                                    <tr v-for="itrS in openBSlist" :key="itrS.id">
+                                        <td>{{itrS.serviceId}}</td>
+                                        <td>{{itrS.client.name}}</td>
+                                        <td>{{itrS.vehicle.model + " - " +itrS.vehicle.year}}</td>
+                                        <td>{{itrS.repairType}}</td>
+                                        <td>{{itrS.date.slice(8,10)+'/'+itrS.date.slice(5,7)+'/'+itrS.date.slice(2,4)+' - '+itrS.time}}</td>
+                                        <td><button type="button" class="btn  btn-secondary btn-sm" id="initiateBtn" data-bs-toggle="modal" data-bs-target="#initiateServiceModal"
+                                             @mousedown="()=>{currOpenBS=itrS; currOpenBSForm.mechanic=''; currOpenBSForm.initialPrice=''}">Gerar</button></td>
+                                    </tr>
+                                </table> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal " id="initiateServiceModal" tabindex="-1" aria-hidden="true" v-if="currOpenBS!=''">
+                <div class="modal-dialog scrollable modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Serviço <small class="lead">#{{currOpenBS.serviceId}}</small></h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      
+                        <div class="row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                              <div class="card">
+                                <div class="card-body">
+                                  <h5 class="card-title">Informações de cliente</h5>
+                                  <div class="container-fluid">
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Nome:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currOpenBS.client.name}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Telefone:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{`(${currOpenBS.client.phone.slice(0,2)})${currOpenBS.client.phone.slice(2,7)}-${currOpenBS.client.phone.slice(7)}`}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">E-mail:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currOpenBS.client.email}}</p>
+                                        </div>
+                                    </div>
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-sm-6">
+                              <div class="card">
+                                <div class="card-body">
+                                  <h5 class="card-title">Informações de veículo</h5>
+                                  <div class="container-fluid">
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Modelo:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currOpenBS.vehicle.model}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Placa:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currOpenBS.vehicle.licensePlate}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-left">
+                                        <div class="col-4">
+                                            <strong class="card-text">Ano:</strong>
+                                        </div>
+                                        <div class="col-auto">
+                                            <p class="card-text"> {{currOpenBS.vehicle.year}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-sm-12">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <h5 class="card-title">Informações de reparo</h5>
+                                    <div class="container-fluid">
+                                      <div class="row justify-content-left">
+                                          <div class="col-4">
+                                              <strong class="card-text">Tipo de reparo:</strong>
+                                          </div>
+                                          <div class="col-auto">
+                                              <p class="card-text"> {{currOpenBS.repairType}}</p>
+                                          </div>
+                                      </div>
+                                      <div class="row justify-content-left">
+                                          <div class="col-4">
+                                              <strong class="card-text">Horário agendado:</strong>
+                                          </div>
+                                          <div class="col-auto">
+                                              <p class="card-text"> {{currOpenBS.date.slice(8,10)+'/'+currOpenBS.date.slice(5,7)+'/'+currOpenBS.date.slice(2,4)+' - '+currOpenBS.time}}</p>
+                                          </div>
+                                      </div>
+                                      <div class="row justify-content-left">
+                                          <div class="col-4">
+                                              <strong class="card-text">Descrição do problema:</strong>
+                                          </div>
+                                          <div class="col-auto">
+                                              <p class="card-text"> {{currOpenBS.details}}</p>
+                                          </div>
+                                      </div>
+                                  </div>
+                                    
+                                  </div>
+                                </div>
+                              </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <h5 class="modal-title">Abertura de novo serviço</h5>
+                            <p class="modal-text">Para iniciar este serviço, preencha o formulário abaixo e pressione "Enviar"</p>
+                            <div class="container-fluid">
+                                <div class="row justify-content-center">
+                                    <form class="container-fluid" id="openBSForm" @submit.prevent="doInitiateOpenBS()">
+                                        <div class="row mb-4 justify-content-center">
+                                            <div class="col-3">
+                                                <label for="mechanic" class="col-form-label">Mecânico responsável</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <select class="form-select" v-model="currOpenBSForm.mechanic" id="mechanic" type="text" id="mechanic"  class="form-control" required>
+                                                    <option v-for="itrM in availableMechanics" :value="itrM.id">{{itrM.name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-5"><p class="form-text">Selecione um mecânico disponível.</p></div>
+                                        </div>
+                                        <div class="row mt-2 justify-content-left">
+                                            <div class="col-3">
+                                                <label for="initialValue" class="col-form-label">Valor inicial</label>
+                                            </div>
+                                            <div class="col-2">
+                                                <input type="number" id="initialValue" v-model="currOpenBSForm.initialPrice" min="0" class="form-control" title="Insira somente números" required>
+                                            </div>
+                                            <div class="col-6"><p class="form-text">Insira o valor inicial do serviço. Use somente dígitos.</p></div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                      <button  type="submit" form="openBSForm" class="btn btn-success" >Enviar</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+              
+
+            <div class="card mb-3">
+                <div class="card-header text-secondary">
+                  Administração de serviços ativos
+                </div>
+                
+                <div class="card-body">
+                    <h4 class="card-title fw-semibold">Planilha de serviços de orçamentos</h4>
+                    <p class="card-text text-break">Abaixo estão dispostos todos os serviços de orçamentos recebidos por você. 
+                        Você pode encerrar um serviço de sua responsabilidade ao selecionar uma das opções da coluna "Operação".</p>
+
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="row justify-content-center">
+                                <div class="col-11">
+                                    <table class="table table-sm align-middle text-center table-light table-striped table-hover" v-if="confirmedBSlist.length>0">
+                                        <tr>
+                                            <th>ID de serviço</th>
+                                            <th>Cliente</th>
+                                            <th>Veículo</th>
+                                            <th>Tipo de reparo</th>
+                                            <th>Orçamento atual</th>
+                                            <th>Status de serviço</th>
+                                            <th>Status de orçamento</th>
+                                            <th>Operação</th>
+                                        </tr>
+                                        <tr v-for="itrS in confirmedBSlist" :key="itrS.id">
+                                            <td>{{itrS.serviceId}}</td>
+                                            <td>{{itrS.client.name}}</td>
+                                            <td>{{itrS.vehicle.model + " - " +itrS.vehicle.year}}</td>
+                                            <td>{{itrS.repairType}}</td>
+                                            <td>{{'$'+itrS.budget.total_cost}}</td>
+                                            <td>{{itrS.serviceStatus}}</td>
+                                            <td>{{itrS.budget.status}}</td>
+                                            <td>
+                                                <button 
+                                                    v-if="itrS.serviceStatus=='Avaliação finalizada' && itrS.budget.status=='Aprovação pendente'"
+                                                    type="button" class="btn  btn-success btn-sm" @click="doAproveCompleteBS(itrS)"> Aprovar
+                                                </button>
+                                                <button v-else class="btn  btn-outline-success btn-sm" disabled>Aprovar</button>
+
+                                                <button 
+                                                    v-if="itrS.serviceStatus=='Avaliação finalizada'"
+                                                    type="button" class="btn btn-warning btn-sm" @click="doRejectCompletedBS(itrS)"> Rejeitar
+                                                </button>
+                                                <button v-else type="button" class="btn btn-outline-warning btn-sm" disabled>Rejeitar</button>
+                                                
+                                                <button
+                                                    v-if="itrS.serviceStatus=='Serviço encerrado'"
+                                                    type="button" class="btn btn-danger btn-sm" @click="doDeleteCompletedBS(itrS)"> Deletar
+                                                </button>
+                                                <button v-else class="btn btn-outline-danger btn-sm" disabled>Deletar</button>
+                                                                                            
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal " id="rejectionModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog ">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Rejeição de orçamento do serviço <small class="lead">#{{currRejectingBS.serviceId}}</small></h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 class="modal-title">Detalhes de rejeição</h5>
+                        <p class="modal-text">Preencha o campo abaixo com o motivo da rejeição do orçamento</p>
+                        <form id="rejectionForm" @submit.prevent="doRejectCompletedBS(currRejectingBS)">
+                            <div class="container-fluid">
+                                <div class="row justify-content-center">
+                                    <textarea class="form-control" id="details" rows="3" v-model="budgetManagerComment" required></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button  type="submit" form="rejectionForm" class="btn btn-warning">Confirmar Rejeição</button>
+                      </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertPlaceHolder" class="position-fixed bottom-0 end-0 p-3"></div>
+</div>        
+</body>
+<script>
+
+
+function appendAlert(message, type, id,ms){
+    let alertPlaceholder = document.getElementById(id)
+    let wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        `<div class="row alert alert-${type} alert-dismissible fade show" role="alert">`,
+        `   <div class="col-auto small">`,
+        `     <i class="col-1 ${(type=='success')? 'bi bi-check-circle-fill':'bi bi-exclamation-triangle'}"></i>`,
+        `     <span>${message}</span>`,
+        '   </div>',
+        '   <button type="button" class="col-1 btn-close" data-bs-dismiss="alert" aria-label="Close" id="alertCloseBtn"></button>',
+        '</div>'
+    ].join('');
+
+    alertPlaceholder.appendChild(wrapper);
+    setTimeout(()=> {
+        document.getElementById('alertCloseBtn').click();
+    },ms);
+}
+
+
+
+async function updateBSRequestsTables(){
+    var request = axios({
+                "method": "get",
+                "url": "/budget"});
+    try {
+        var response = await request;
+        let selectedList;
+        for (itrS of response.data.personalBS){
+            selectedList = (itrS.serviceStatus != "Solicitação de serviço enviada")? app.confirmedBSlist : app.openBSlist;
+            let index = selectedList.findIndex( (element) => element.serviceId == itrS.serviceId);
+            if (index!=-1){
+                selectedList[index]=itrS;
+            } else {
+                selectedList.push(itrS);
+            }
+        }
+        app.confirmedBSlist.sort((a,b)=>{
+            let statusA, statusB;
+            if (a.serviceStatus=='Avaliação finalizada') statusA = 1;
+            else if (a.serviceStatus=='Avaliação em andamento') 2;
+            else statusA = 3;
+            if (b.serviceStatus=='Avaliação finalizada') statusB = 1;
+            else if (b.serviceStatus=='Avaliação em andamento') statusB = 2;
+            else statusB = 3;
+            return statusA - statusB;
+        });
+
+        app.availableMechanics = response.data.availableMechanics;
+    } catch (error) {   
+        return
+    }
+}
+
+async function initiateOpenBS(){
+    const modalEl = document.getElementById('initiateServiceModal');
+    const modalBooststrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalBooststrap.hide();
+
+    var request = axios({
+                "method": "put",
+                "url": '/budget/manage/'+app.currOpenBS.serviceId,
+                "headers": { "Content-Type": "application/json" },
+                "data":JSON.stringify(app.currOpenBSForm)});
+    try {
+        var response = await request;
+        let index = app.openBSlist.findIndex((element) => element.serviceId == app.currOpenBS.serviceId);
+        app.openBSlist.splice(index,1);
+        appendAlert('Serviço iniciado com sucesso!','success','alertPlaceHolder',2500);
+        updateBSRequestsTables();
+
+    } catch (errr){
+        console.log(errr)
+        return;
+    }
+}
+
+
+async function aproveCompleteBS(service){
+    var request = axios({
+                "method": "put",
+                "url": '/budget/manage/'+service.serviceId,
+                "headers": { "Content-Type": "application/json" },
+                "data":JSON.stringify({result:'aproved'})    
+            });
+    try {
+        var response = await request;
+        let index = app.confirmedBSlist.findIndex((element) => element.serviceId == service.serviceId);
+        app.confirmedBSlist.splice(index,1);
+        appendAlert('Orçamento aprovado com sucesso! Serviço finalizado.','success','alertPlaceHolder',2500);
+        updateBSRequestsTables();
+    } catch (errr){
+        console.error(errr);
+        return;
+    }
+}
+
+async function rejectCompletedBS(service){
+    const modalEl = document.getElementById('rejectionModal');
+    modalEl.addEventListener('hide.bs.modal',()=>{app.currRejectingBS=''});
+    const modalBooststrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+    if (service.budget.status != 'Rejeição pendente' && app.budgetManagerComment == ''){
+        app.currRejectingBS = service;
+        modalBooststrap.show();
+        return;
+    } else if (service.budget.status != 'Rejeição pendente' && (/^([a-zA-ZÀ-ÿ'0-9:,./!]+[ ]*[a-zA-ZÀ-ÿ'0-9:,./!]+)+$/.test(app.budgetManagerComment)==false) ){
+        appendAlert('Campo de detalhes preenchido incorretamente. Reescreva-o e tente novamente.','warning','alertPlaceHolder',3000);
+        app.currRejectingBS = service;
+        return
+    }
+
+    var request = axios({
+                    "method": "put",
+                    "url": '/budget/manage/'+service.serviceId,
+                    "headers": { "Content-Type": "application/json" },
+                    "data":JSON.stringify({result:'rejected', budgetManagerComment: app.budgetManagerComment})  
+                });
+        try {
+            var response = await request;
+            let index = app.confirmedBSlist.findIndex((element) => element.serviceId == service.serviceId);
+            app.confirmedBSlist.splice(index,1);
+            updateBSRequestsTables();
+            app.budgetManagerComment = '';
+            modalBooststrap.hide();
+            appendAlert('Orçamento rejeitado com sucesso! Serviço finalizado.','success','alertPlaceHolder',2500);
+        } catch (errr){
+            console.error(errr);
+            return;
+        }
+}
+
+async function deleteCompletedBS(service){
+    var request = axios({
+                "method": "delete",
+                "url": "/budget/manage/"+service.serviceId});
+    try {
+        var response = await request;
+        let index = app.confirmedBSlist.findIndex((element) => element.serviceId == service.serviceId);
+        app.confirmedBSlist.splice(index,1);
+        appendAlert('Servicço deletado com sucesso.','success','alertPlaceHolder',2500);
+        updateBSRequestsTables();
+    } catch (error) {
+        return;
+    } 
+}
+
+async function logout(){
+    var request = axios({
+                "method": "delete",
+                "url": "/login"});
+    try {
+        var response = await request;
+        window.open('/','_self');
+    } catch (error) {
+        return;
+    } 
+}
+
+var configdata = {
+el: '#app',
+data: {
+    openBSlist : [],
+    currOpenBS : '',
+    currOpenBSForm : {mechanic: '', initialPrice:''},
+    confirmedBSlist : [],
+    currRejectingBS: '',
+    budgetManagerComment: '',
+    availableMechanics : []
+},
+methods: {
+    doInitiateOpenBS : initiateOpenBS,
+    doAproveCompleteBS : aproveCompleteBS,
+    doRejectCompletedBS : rejectCompletedBS,
+    doDeleteCompletedBS : deleteCompletedBS,
+    doLogout: logout
+}
+}
+var app;
+window.onload = () => {
+app = new Vue(configdata);
+updateBSRequestsTables();
+} 
+
+</script>
+            

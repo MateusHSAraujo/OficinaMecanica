@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Serviços de Orçamento</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    </head>
+
+    <body  class="bg-primary-subtle min-vh-100">
+    <div id="app">
+        <nav class="navbar navbar-expand-lg border-bottom border-dark bg-body-tertiary fs-6 text-body" style="--bs-border-opacity: .5;">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/"><i class="bi bi-gear-wide-connected me-1"></i>Oficina Mecânica</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" aria-current="page" href="/home">Menu do cliente</a></li>
+                    <li class="nav-item"><a class="nav-link" href="">Contato</a></li>
+                    <li class="nav-item"><a class="nav-link" href="">Quem somos</a></li>
+                </ul>
+                <div class="navbar-nav justify-content-left">
+                    <a class="nav-link" href="">Área do usuário</a>
+                    <button class=" nav-link text-start" data-bs-toggle="modal" data-bs-target="#logoutModal"> Encerrar sessão</button>
+                    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="logoutModalLabel">Encerramento de sessão</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            Você está encerrando o sistema. Deseja finalizar sua sessão?
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-danger" @click="doLogout()">Finalizar</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+    
+              </div>
+            </div>
+        </nav>
+
+        
+        <div class="container-fluid p-5 pt-2">
+            
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h1 class="text-center my-3" >Serviços de Orçamento</h1>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header text-secondary">
+                  Solicitação de novo serviço
+                </div>
+                
+                <div class="card-body">
+                    <h4 class="card-title fw-semibold">Agendamento de novo serviço de orçamento</h4>
+                    <p class="card-text">Preencha o formulário abaixo com os dados referentes ao reparo desejado e pressione "enviar" para agendar serviço.</p>
+                    <form class="row mb-3 gx-3 gy-2 justify-content-center" @submit.prevent="doGenerateNewBSRequest()">
+                        <div class="col-4">
+                            <div>
+                                <label for="vehicle" class="form-label">Veículo</label>
+                                <select class="form-select" id="vehicle" v-model="newBS.vehicle" required>
+                                    <option v-for="itrV in userVehicles" :key="itrV.id" :value="itrV.id">{{itrV.model}} - {{itrV.year}} - {{itrV.licensePlate}}</option>
+                                </select>
+                                <div id="vehicleHelp" class="form-text">Selecione o veículo que deseja realizar orçamento de reparo.</div>
+                            </div>
+                            <div class="my-3">
+                                <label for="repairType" class="form-label">Tipo de reparo</label>
+                                <select class="form-select" id="repairType" v-model="newBS.repairType" required>
+                                    <option value="Troca de peça">Troca de peça</option>
+                                    <option value="Conserto de Lataria">Conserto de lataria</option>
+                                    <option value="Pintura">Pintura</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                                <div id="repairTypeHelp" class="form-text">Selecione o tipo de reparo que deseja realizar. Caso não saiba qual reparo deseja, selecione a opção "Outro" e descreva seu problema abaixo.</div>
+                            </div>
+                            <div>
+                                <label for="details" class="form-label">Descrição</label>
+                                <textarea class="form-control" id="details" rows="3" v-model="newBS.details" required></textarea>
+                                <div id="detailsHelp" class="form-text">Descreva aqui o problema apresentado por seu veículo.</div>
+                            </div>
+                        </div>
+                        <div class="col-3 justify-content-center ">
+                                <div class="container h-100 ">
+                                    <div class="row align-items-center h-100">
+                                        <div class="col">
+                                            <div class="row align-items-center">
+                                                <label for="date" class="form-label" >Data de preferência</label>
+                                                <div class="col-6">
+                                                    <input type="date" class="form-control" id="date" v-model="newBS.date" @change="doCheckDate()"
+                                                            :min="todayDate.getFullYear() +'-'+(todayDate.getMonth()+1)+'-'+(todayDate.getDate()+1)" 
+                                                            :max="(todayDate.getFullYear()+1) +'-'+(todayDate.getMonth()+1)+'-'+(todayDate.getDate()+1)"
+                                                            required>
+                                                            <div class="invalid-feedback"><small>
+                                                                Dia inválido selecionado.
+                                                            </small></div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div id="timeHelp" class="form-text">Selecione um dia entre Segunda e Sexta-feira.</div>
+                                                </div>
+                                                
+                                            </div>
+
+                                            <div class="row align-items-center">
+                                                <label for="time" class="form-label mt-2">Horário de preferência</label>
+                                                <div class="col-4">
+                                                    <select class="form-select" disabled v-if="selectedDayAvailableHours.length==0">
+                                                        <option>--:--</option>
+                                                    </select>
+                                                    <select class="form-select" id="time" v-model="newBS.time" required v-else>
+                                                        <option v-for="itrT in selectedDayAvailableHours" :value="itrT">{{itrT}}</option>
+                                                    </select>
+                                                    <div class="invalid-feedback"><small>
+                                                        Horário inválido fornecido.
+                                                    </small></div>
+                                                </div>
+                                                <div class="col">
+                                                    <div id="timeHelp" class="form-text" v-if="selectedDayAvailableHours.length==0">Primeiramente, selecione uma data.</div>
+                                                    <div id="timeHelp" class="form-text" v-else>Selecione um horário disponível.</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <button class="col-12 my-2 btn btn-success" type="submit">Agendar serviço</button>
+
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header text-secondary">
+                  Histórico de serviços
+                </div>
+                
+                <div class="card-body">
+                    <h4 class="card-title fw-semibold">Serviços solicitados</h4>
+                    <p class="card-text text-break">Confira abaixo todos os seus serviços de orçamentos solicitados. Se desejar, pressione o botão "Requisitar reparo" agendar o reparo correspondente ao orçamento escolhido.</p>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col">
+                                <table class="table table-sm align-middle text-center table-light table-striped table-hover" v-if="servicesList.length>0">
+                                    <tr>
+                                        <th>ID de serviço</th>
+                                        <th>Agendamento</th>
+                                        <th>Veículo</th>
+                                        <th>Tipo de reparo</th>
+                                        <th>Status de serviço</th>
+                                        <th>Orçamento atual</th>
+                                        <th>Status de orçamento</th>
+                                        <th>Operação</th>
+                                    </tr>
+                                    <tr v-for="itrS in servicesList" :key="itrS.id">
+                                        <td>{{itrS.serviceId}}</td>
+                                        <td>{{itrS.date}}</td>
+                                        <td>{{itrS.vehicle}}</td>
+                                        <td>{{itrS.repairType}}</td>
+                                        <td>{{itrS.serviceStatus}}</td>
+                                        <td>{{itrS.currBudget}}</td>
+                                        <td>{{itrS.currBudgetStatus}}</td>
+                                        <td>
+                                            <button v-if="itrS.serviceStatus=='Serviço encerrado' && itrS.currBudgetStatus=='Aprovado' && itrS.requestedRepair==false" 
+                                                class="btn  btn-success btn-small" v-on:click="doRequestRepair()">Requisitar reparo</button>
+                                            <button v-else class="btn btn-outline-success btn-small" disabled> Requisistar reparo</button>
+                                        </td>
+                                    </tr>
+                                </table> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="createBSAlert" class="position-fixed bottom-0 end-0 p-3"></div>
+            
+        </div>
+</div>        
+</body>
+<script>
+
+function appendAlert(message, type, id,ms){
+    
+    prevAlertCloseBtn = document.getElementById('alertCloseBtn')
+    if (prevAlertCloseBtn!=null) prevAlertCloseBtn.click();
+
+    let alertPlaceholder = document.getElementById(id)
+    let wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        `<div class="row alert alert-${type} alert-dismissible fade show" role="alert">`,
+        `   <div class="col-auto small">`,
+        `     <i class="col-1 ${(type=='success')? 'bi bi-check-circle-fill':'bi bi-exclamation-triangle'}"></i>`,
+        `     <span>${message}</span>`,
+        '   </div>',
+        '   <button type="button" class="col-1 btn-close" data-bs-dismiss="alert" aria-label="Close" id="alertCloseBtn"></button>',
+        '</div>'
+    ].join('');
+
+    alertPlaceholder.appendChild(wrapper);
+    setTimeout(()=> {
+        document.getElementById('alertCloseBtn').click();
+    },ms);
+}
+
+async function checkDate(){
+    let dateEl = document.getElementById('date');
+    let aux = new Date(app.newBS.date+'T12:00:00');
+    if (aux.getDay()==0 || aux.getDay()==6){
+        dateEl.classList.add('is-invalid');
+        timeEl.classList.add('disable');
+    } else{
+        dateEl.classList.remove('is-invalid');
+        let tmp = {date:app.newBS.date};
+        var data = JSON.stringify(tmp);
+        var response;
+        var request = axios({
+                "method": "post",
+                "url": "/budget/info",
+                "headers": { "Content-Type": "application/json" },
+                "data": data});
+        try {
+            response = await request;
+            app.selectedDayAvailableHours = response.data;
+            app.newBS.time = app.selectedDayAvailableHours[0];  
+        } catch (error) {
+            return;
+        } 
+    }
+}
+
+
+async function generateNewBSRequest(){
+
+    if(/^([a-zA-ZÀ-ÿ'0-9:,./!]+[ ]*[a-zA-ZÀ-ÿ'0-9:,./!]+)+$/.test(app.newBS.details)==false){
+        appendAlert('Campo de detalhes preenchido incorretamente. Reescreva-o e tente novamente.','warning','createBSAlert',3000);
+        return
+    }
+
+    let tmp = {newBS:app.newBS};
+    var response;
+    var data = JSON.stringify(tmp);
+    var request = axios({
+                "method": "post",
+                "url": "/budget",
+                "headers": { "Content-Type": "application/json" },
+                "data": data});
+    try {
+        response = await request;
+        appendAlert('Solicitação de serviço cadastrada com sucesso','success','createBSAlert',3000);
+        updateServicesTable();
+        app.newBS.vehicle='';
+        app.newBS.repairType='';
+        app.newBS.details='';
+        app.newBS.date=''; 
+        app.newBS.time='';
+        app.selectedDayAvailableHours = [];
+    } catch (error) {
+        console.error(error);
+        appendAlert(error.response.data,'danger','createBSAlert',3000);
+        return;
+    } 
+}
+
+async function updateServicesTable(){
+    var request = axios({
+                "method": "get",
+                "url": "/budget"});
+    try {
+        var response = await request;
+        for (itrS of response.data){
+            let tmp = {
+                'date': itrS.date.slice(8,10)+'/'+itrS.date.slice(5,7)+'/'+itrS.date.slice(2,4)+' - '+itrS.time,
+                'serviceId': itrS.serviceId, 
+                'vehicle': `${itrS.vehicle.model} - ${itrS.vehicle.year} - ${itrS.vehicle.licensePlate}`,
+                'repairType': itrS.repairType,
+                'requestedRepair': itrS.requestedRepair,
+                'mechanic': itrS.mechanicName,
+                'currBudget': (itrS.budget==undefined)? '--': '$'+itrS.budget.total_cost,
+                'currBudgetStatus': (itrS.budget==undefined)? '--':itrS.budget.status,
+                'serviceStatus': itrS.serviceStatus
+            }
+
+            let index = app.servicesList.findIndex( (element) => element.serviceId == tmp.serviceId);
+            if (index!=-1){
+                app.servicesList[index]=tmp;
+            } else {
+                app.servicesList.push(tmp);
+            }
+        }
+        app.servicesList.sort((a,b)=>{
+                let pA, pB;
+                if(a.serviceStatus=='Solicitação de serviço enviada') pA = 1;
+                if(a.serviceStatus=='Em andamento') pA = 2;
+                if(a.serviceStatus=='Avaliação finalizada') pA = 3;
+                if(a.serviceStatus=='Serviço encerrado' && a.currBudgetStatus=='Aprovado') pA = 4;
+                if(a.serviceStatus=='Serviço encerrado' && a.currBudgetStatus=='Rejeitado') pA = 5;
+                
+                if(b.serviceStatus=='Solicitação de serviço enviada') pB = 1;
+                if(b.serviceStatus=='Em andamento') pB = 2;
+                if(b.serviceStatus=='Avaliação finalizada') pB = 3;
+                if(b.serviceStatus=='Serviço encerrado' && b.currBudgetStatus=='Aprovado') pB = 4;
+                if(b.serviceStatus=='Serviço encerrado' && b.currBudgetStatus=='Rejeitado') pB = 5;
+                
+                return pA - pB;
+            });
+
+    } catch (error) {   
+        console.error(error);
+        return;
+    } 
+}
+
+async function requestRepair(){
+    window.open('/repairs/home','_self');
+}
+
+async function logout(){
+    var request = axios({
+                "method": "delete",
+                "url": "/login"});
+    try {
+        var response = await request;
+        window.open('/','_self');
+    } catch (error) {
+        return;
+    } 
+}
+
+async function getUserVehicles(){
+    var request = axios({
+                "method": "get",
+                "url": "/budget/info"});
+    try {
+        var response = await request;
+        app.userVehicles = response.data;
+    } catch (error) {
+        return;
+    } 
+    
+}
+
+var configdata = {
+  el: '#app',
+  data: {
+        newBS: {vehicle:'',repairType:'', details:'', date:'', time:''},
+        todayDate: '',
+        servicesList: [],
+        selectedDayAvailableHours: [],
+        userVehicles: [],
+  },
+  methods: {
+        doGenerateNewBSRequest: generateNewBSRequest,
+        doRequestRepair: requestRepair,
+        doLogout : logout,
+        doCheckDate : checkDate,
+  }
+}
+var app;
+window.onload = () => {
+    app = new Vue(configdata);
+    getUserVehicles();
+    app.todayDate = new Date();
+    updateServicesTable();
+} 
+
+</script>
+            

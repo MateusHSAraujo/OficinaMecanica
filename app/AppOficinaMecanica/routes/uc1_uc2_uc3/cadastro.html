@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Cadastro de cliente</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    </head>
+
+    <body class="bg-primary-subtle min-vh-100">
+
+        <nav class="navbar navbar-expand-lg border-bottom border-dark bg-body-tertiary fs-6 text-body" style="--bs-border-opacity: .5;">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#"><i class="bi bi-gear-wide-connected me-1"></i>Oficina Mecânica</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Menu</a></li>
+                    <li class="nav-item"><a class="nav-link">Contato</a></li>
+                    <li class="nav-item"><a class="nav-link">Quem somos</a></li>
+                </ul>
+                
+              </div>
+            </div>
+        </nav>
+
+        
+        <div id="app" class="container-fluid p-5 pt-2">
+            
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h1 class="text-center my-3" >Cadastramento de novo cliente</h1>
+                </div>
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header text-secondary">
+                  Dados de Cliente
+                </div>
+                <!--Formulário de dados do cliente-->
+                <div class="card-body">
+                    <h4 class="card-title fw-semibold">Informações de cadastro</h4>
+                    <p class="card-text">Forneça seus dados pessoais para serem cadastrados na nova conta.</p>
+                    <!--Informações de cadastro-->
+                    <form class="row mb-3 gx-3 gy-2 justify-content-center" id="clientInfo" @submit.prevent="doRegisterNewClient()">
+                        
+                        <div class="col-2" id="nameContainer">
+                            <label for="name" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="name" v-model="client.name" @blur="doValidateField('name',/^([a-zA-ZÀ-ÿ']+[ ]*[a-zA-ZÀ-ÿ']+)+$/)" @input="doEraseInvalidState('name')" pattern="^([a-zA-ZÀ-ÿ']+[ ]*[a-zA-ZÀ-ÿ']+)+$" required>
+                            <div class="invalid-feedback"><small>Seu nome deve conter somente letras e espaços.</small></div>
+                        </div>
+                        <div class="col-2">
+                            <label for="surname" class="form-label" id="surnameContainer">Sobrenome</label>
+                            <input type="text" class="form-control" id="surname"  v-model="client.surname" @blur="doValidateField('surname',/^([a-zA-ZÀ-ÿ']+[ ]*[a-zA-ZÀ-ÿ']+)+$/)" @input="doEraseInvalidState('surname')" pattern="^([a-zA-ZÀ-ÿ']+[ ]*[a-zA-ZÀ-ÿ']+)+$" required>
+                            <div class="invalid-feedback"><small>Seu sobrenome deve conter somente letras e espaços.</small></div>
+                        </div>
+                        <div class="col-2">
+                            <label for="birthday" class="form-label" id="birthdayContainer">Data de nascimento</label>
+                            <input type="date" class="form-control" id="birthday" v-model="client.birthday" @blur="doValidateField('birthday',/.+/)" @input="doEraseInvalidState('birthday')" pattern=".+" required>
+                            <div class="invalid-feedback"><small>Selecione uma data de nascimento válida.</small></div>
+                            
+                        </div>
+                        <div class="col-1">
+                            <label for="cpf" class="form-label" id="cpfContainer">CPF</label>
+                            <input type="text" class="form-control" id="cpf" v-model="client.cpf" @blur="doValidateField('cpf',/^([0-9]{3}){3}[0-9]{2}$/)" @input="doEraseInvalidState('cpf')" pattern="^([0-9]{3}){3}[0-9]{2}$" title="Insira somente dígitos" required>
+                            <div class="invalid-feedback"><small>Forneça um CPF válido.</small></div>
+                        </div>
+                        <div class="v-100"></div>
+                        <div class="col-2">
+                            <label for="email" class="form-label" id="emailContainer">Email</label>
+                            <input type="text" class="form-control" id="email" v-model="client.email" @blur="doValidateField('email',/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/)" @input="doEraseInvalidState('email')" pattern="^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" required>
+                            <div class="invalid-feedback"><small>Forneça um email válido.</small></div>
+                        </div>
+                        <div class="col-2">
+                            <label for="endereço" class="form-label" id="adressContainer">Endereço</label>
+                            <input type="text" class="form-control" id="address" v-model="client.address" @blur="doValidateField('address',/^([a-zA-ZÀ-ÿ'0-9,-]+[ ]*[a-zA-ZÀ-ÿ'0-9,-]+)+$/)" @input="doEraseInvalidState('address')" pattern="^([a-zA-ZÀ-ÿ'0-9,]+[ ]*[a-zA-ZÀ-ÿ'0-9,]+)+$" required>
+                            <div class="invalid-feedback"><small>Forneça um endereço válido.</small></div>
+                        </div>
+            
+                        <div class="col-1">
+                            <label for="phone" class="form-label" id="phoneContainer">Telefone</label>
+                            <input type="text" class="form-control" id="phone" v-model="client.phone" @blur="doValidateField('phone',/^[0-9]{11}$/)" @input="doEraseInvalidState('phone')" pattern="^[0-9]{11}$" title="Insira somente dígitos" required>
+                            <div class="invalid-feedback"><small>Forneça um telefone válido.</small></div>
+                        </div>
+                        
+                        <div class="col-1">
+                            <label for="cep" class="form-label" id="cepContainer">CEP</label>
+                            <input type="text" class="form-control" id="cep" v-model="client.cep" @blur="doValidateField('cep',/^[0-9]{8}$/)" @input="doEraseInvalidState('cep')" pattern="^[0-9]{8}$" title="Insira somente dígitos" required>
+                            <div class="invalid-feedback"><small>Forneça um CEP válido.</small></div>
+                        </div>
+                        <div class="col-1"></div>
+                    </form>
+
+                    
+                    <h4 class="card-title fw-semibold">Informações de conta</h4>
+                    <p class="card-text">Escolha um nome de usuário e uma senha para acessar sua nova conta.</p>
+                    <!--Informações de conta-->
+                    <div class="row mb-3 gx-3 gy-2 justify-content-center">
+                        <div class="col-2">
+                            <label for="username" class="form-label" id="usernameContainer">Nome de usuário</label>
+                            <input type="text" class="form-control" id="username" form="clientInfo"  v-model="user.username" @blur="doValidateField('username',/^[\w_@\.]+$/)" @input="doEraseInvalidState('username')" pattern="^[\w_@\.]+$" required>
+                            <div class="invalid-feedback"><small>
+                                Nome de usuário inválido. Utilize somente:
+                                <ul>
+                                    <li>Letras</li>
+                                    <li>Números</li>
+                                    <li>Caracteres especiais (_@.)</li>
+                                </ul>
+                            </small></div>
+                        </div>
+                        
+                        <div class="col-2">
+                            <label for="password" class="form-label" id="passwordContainer">Senha</label>
+                            <input type="password" class="form-control" id="password" form="clientInfo"  v-model="user.password" @blur="doValidateField('password',/^[\w_@\.]{6,}$/)" @input="doEraseInvalidState('password')" pattern="^[\w_@\.]{6,}$" required>
+                            <div class="invalid-feedback"><small>
+                                Senha inválida. Utilize ao menos 6:
+                                <ul class="justify-content-left">
+                                    <li>Letras</li>
+                                    <li>Números</li>
+                                    <li>Caracteres especiais (_@.)</li>
+                                </ul>
+                            </small></div>
+                        </div>
+
+                        <div class="col-3"></div>
+                    </div>
+                </div>
+              </div>
+
+                <!--Informações de veículo-->    
+                <div class="card mb-3">
+                    <div class="card-header text-secondary">
+                        Dados de Veículos
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title fw-semibold">Cadastrar veículos a sua conta</h4>
+                        <p class="card-text">Cadastre seus veículos à sua nova conta. Os serviços da oficina só poderão ser requisitados para veículos cadastrados</p>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <button type="button" class="col-auto mb-3 btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarModal"> Cadastrar novo veículo</button>
+
+                                <div class="modal " id="addCarModal" tabindex="-1" aria-labelledby="addCarModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="addCarModalLabel">Cadastrar novo veículo</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="addCarForm" @submit.prevent="doAddCurrVToList()">
+                                                    <div class="container text-center justify-content-center">                                                       
+                                                            <div class="row mb-2">
+                                                                <div class="col-3">
+                                                                    <label for="model" class="col-form-label">Modelo</label>
+                                                                </div>
+                                                                <div class="col-9">
+                                                                    <input type="text" id="model" v-model="currV.model" class="form-control" @blur="doValidateCarField('model',/^([a-zA-ZÀ-ÿ'0-9]+[ ]*[a-zA-ZÀ-ÿ'0-9]+)+$/)" @input="doEraseInvalidState('model')" pattern="^([a-zA-ZÀ-ÿ'0-9]+[ ]*[a-zA-ZÀ-ÿ'0-9]+)+$" title="Não utilize caracteres especiais" required>
+                                                                    <div class="invalid-feedback col"><small>
+                                                                        Modelo inválido.
+                                                                    </small></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mb-3">
+                                                                <div class="col-3">
+                                                                    <label for="licensePlate" class="col-form-label">Placa</label>
+                                                                </div>
+                                                                <div class="col-9">
+                                                                    <input type="text" id="licensePlate" v-model="currV.licensePlate" class="form-control" @blur="doValidatePlate()" @input="doEraseInvalidState('licensePlate')" pattern="^[a-zA-Z]{3}\d[a-zA-Z]\d{2}$" title="Obedeça o padrão das placas brasileiras" required>
+                                                                    <div class="invalid-feedback"><small>
+                                                                        {{plateInvalidMsg}}
+                                                                    </small></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mb-3">
+                                                                <div class="col-7">
+                                                                    <label for="year" class="col-form-label">Ano de fabricação</label>
+                                                                </div>
+                                                                <div class="col-5">
+                                                                    <input type="text" id="year" v-model="currV.year" class="form-control"  @blur="doValidateCarField('year',/^[0-9]{4}$/)" pattern="^[0-9]{4}$" @input="doEraseInvalidState('year')" title="Digite o ano com 4 dígitos" required>
+                                                                    <div class="invalid-feedback"><small>
+                                                                        Ano inválido.
+                                                                    </small></div>
+                                                                </div>
+                                                            </div>  
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div id="alertPlaceHolder" class="row container-fluid"></div>
+                                                <button class="col-auto btn btn-danger" data-bs-dismiss="modal" id="closeCarBtn">Fechar</button>
+                                                <button class="col-auto btn btn-success" type="submit" form="addCarForm" id="addCarBtn">Adicionar veículo</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row justify-content-center">
+                                    <div class="col-9">
+                                        <div class="card mb-3">
+                                            <div class="card-body text-litgh">
+                                              <h5 class="card-title">Veículos adicionados:</h5>
+                                              <div class="row justify-content-center">
+                                                <div class="col-6">
+                                                    <div id="alertVehiclePH" class="row container-fluid"></div>
+                                                    <table class="table align-middle table-light table-striped table-hover" v-if="vehicles.length>0">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Placa</th>
+                                                            <th>Modelo</th>
+                                                            <th>Ano</th>
+                                                            <th>Operação</th>
+                                                        </tr>
+                                                        <tr v-for="itrV in vehicles" :key="vehicles.id">
+                                                            <td>{{itrV.id}}</td>
+                                                            <td>{{itrV.licensePlate}}</td>
+                                                            <td>{{itrV.model}}</td>
+                                                            <td>{{itrV.year}}</td>
+                                                            <td><button class="btn btn-outline-danger" v-on:click="doDeleteVehicleFromList(itrV)">Remover</button></td>
+                                                        </tr>
+                                                    </table> 
+                                                </div>
+                                              </div>
+                                            </div>
+                                        </div>                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="container-fluid mb-3">
+                    <div class="row mb-3"><div id="registerAlertPH" class="row container-fluid"></div></div>
+                    <div class="row justify-content-center">
+                        <button class="me-5 col-1 gx-1 btn btn btn-large btn-secondary" @click="doReturnToPreviousPage()">Voltar</button>
+                        <button class="col-10 btn btn btn-large btn-success" form = "clientInfo">Finalizar cadastro</button>
+                    </div>
+                    
+                </div>
+        </div>
+        
+        
+    </body>
+</html>
+
+<script>
+function eraseInvalidState(id){
+    let containerEl = document.getElementById(id);
+    containerEl.classList.remove('is-invalid');
+}
+
+function appendAlert(message, type, id,ms){
+    let alertPlaceholder = document.getElementById(id)
+    let wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        `<div class="row alert alert-${type} alert-dismissible show" role="alert">`,
+        `   <div class="col-auto small">`,
+        `     <i class="col-1 ${(type=='success')? 'bi bi-check-circle-fill':'bi bi-exclamation-triangle'}"></i>`,
+        `     <span>${message}</span>`,
+        '   </div>',
+        '   <button type="button" class="col-1 btn-close" data-bs-dismiss="alert" aria-label="Close" id="alertCloseBtn"></button>',
+        '</div>'
+    ].join('');
+
+    alertPlaceholder.appendChild(wrapper);
+    /*
+    setTimeout(()=> {
+        let el = document.getElementById('alertCloseBtn')
+        if(el!=null)el.click();
+    },ms);
+    */
+}
+
+
+function validateField(fieldId,pattern){
+    let fieldEl = document.getElementById(fieldId);
+    if(pattern.test(fieldEl.value)){
+        fieldEl.classList.remove('is-invalid');
+        fieldEl.classList.add('is-valid');
+    }else{
+        fieldEl.classList.remove('is-valid');
+        fieldEl.classList.add('is-invalid');
+    }
+}
+
+function validateCarField(fieldId,pattern){
+    let fieldEl = document.getElementById(fieldId);
+    if(pattern.test(fieldEl.value)){
+        fieldEl.classList.remove('is-invalid');
+    }else{
+        fieldEl.classList.add('is-invalid');
+    }
+}
+
+
+function validatePlate(){
+    let fieldEl = document.getElementById('licensePlate');
+    
+    if(/^[a-zA-Z]{3}\d[a-zA-Z]\d{2}$/.test(app.currV.licensePlate)==false){
+        fieldEl.classList.add('is-invalid');
+        app.plateInvalidMsg = 'Placa inválida';
+        return;
+    }else{
+        for(let itrV of app.vehicles){
+            if(itrV.licensePlate == app.currV.licensePlate){
+                fieldEl.classList.add('is-invalid');
+                app.plateInvalidMsg = 'Veículo de mesma placa já adicionado';
+                return;
+            }
+        }
+        app.plateInvalidMsg='';
+        fieldEl.classList.remove('is-invalid');
+        
+    }
+}
+
+async function registerNewClient(){
+    if(app.vehicles.length==0){
+        appendAlert('Você deve adicionar ao menos um veículo para poder fazer cadastro','warning','alertVehiclePH',3000)
+        return;
+    }
+
+    app.client.name = app.client.name.trim();
+    app.client.name = app.client.name.charAt(0).toUpperCase() + app.client.name.slice(1);
+    app.client.surname = app.client.surname.trim();
+    app.client.surname = app.client.surname.charAt(0).toUpperCase() + app.client.surname.slice(1);
+    app.client.address = app.client.address.trim();
+
+    let tmp={
+        userPersonalData:app.client,
+        user:app.user,
+        userVehicles: app.vehicles
+    };
+
+    var data = JSON.stringify(tmp);
+    var response;
+    var request = axios({
+              "method": "post",
+              "url": '/register',
+              "headers": { "Content-Type": "application/json" },
+              "data": data});
+    try{
+        response = await request;
+        appendAlert('Cadastro realizado com sucesso! Retornando para página principal em segundos.','success','registerAlertPH',3000);
+        setTimeout(returnToPreviousPage,4000);
+    } catch(error){
+        appendAlert(error.response.data,'danger','registerAlertPH',3000);
+        return;
+    }
+}
+
+function returnToPreviousPage(){
+    window.open('/','_self');
+}
+
+function addCurrVToList() {
+    for(let itrV of app.vehicles){
+        if(itrV.licensePlate == app.currV.licensePlate){
+            fieldEl.classList.add('is-invalid');
+            app.plateInvalidMsg = 'Veículo de mesma placa já adicionado';
+            return;
+        }
+    }
+    
+    let newV = JSON.parse(JSON.stringify(app.currV));
+    newV.licensePlate = newV.licensePlate.toUpperCase();
+    newV['id'] = app.vehicles.length+1;
+    app.vehicles.push(newV);
+    app.currV.year='';
+    app.currV.model='';
+    app.currV.licensePlate='';
+    appendAlert('Veículo adicionado com sucesso','success','alertPlaceHolder',2700);
+}
+
+function deleteVehicleFromList(vehicle){
+    let newId = 1;
+    for(let vIdx in app.vehicles){
+        if(vehicle===app.vehicles[vIdx]){
+            app.vehicles.splice(vIdx,1);
+            continue;
+        }
+        app.vehicles[vIdx].id=newId;
+        newId++;
+    }
+}
+
+
+
+var configdata = {
+  el: '#app',
+
+  data: {
+        client: {
+            name:'',
+            surname:'',
+            birthday:'',
+            cpf:'',
+            cep:'',
+            address:'',
+            phone:''
+        },
+
+        user: {
+            username:'',
+            password:''
+        },
+        
+        vehicles: [],
+        
+        currV: {
+            year:'',
+            model:'',
+            licensePlate:''
+        },
+        plateInvalidMsg : '',
+
+
+  },
+
+  methods: {
+      doRegisterNewClient: registerNewClient,
+      doAddCurrVToList: addCurrVToList,
+      doDeleteVehicleFromList: deleteVehicleFromList,
+      doValidateField: validateField,
+      doValidateCarField: validateCarField,
+      doValidatePlate: validatePlate,
+      doReturnToPreviousPage: returnToPreviousPage,
+      doEraseInvalidState: eraseInvalidState
+      
+  }
+}
+
+var app;
+window.onload = () => app = new Vue(configdata);
+
+</script>
